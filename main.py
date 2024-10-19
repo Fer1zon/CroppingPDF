@@ -6,6 +6,7 @@ import shutil
 
 import time
 
+from pymupdf import FileDataError
 
 
 def clear_dir(folder : Path):
@@ -27,19 +28,22 @@ def clear_dir(folder : Path):
 
 
 def pdf_cropping_top(input_file_path, output_directory : str, crop_box = fitz.Rect(110, 30, 560, 340), rotation : int = -90):
-    with fitz.open(input_file_path) as doc:
-        
-        
-        for page in doc:
+    try:
+        with fitz.open(input_file_path) as doc:
             
+            
+            for page in doc:
+                
 
-            
-            
-            page.set_cropbox(crop_box)
-            page.set_rotation(page.rotation + rotation)
+                
+                
+                page.set_cropbox(crop_box)
+                page.set_rotation(page.rotation + rotation)
 
-        output_path = str(output_directory) + "\\" + input_file_path.split('\\')[-1]
-        doc.save(output_path)
+            output_path = str(output_directory) + "\\" + input_file_path.split('\\')[-1]
+            doc.save(output_path)
+    except FileDataError:
+        pass
 
 
 def pdf_cropping_bottom(input_file_path, output_directory : str, crop_box = fitz.Rect(15, 25, 330, 480), rotation : int = 90):
@@ -54,6 +58,8 @@ def pdf_cropping_bottom(input_file_path, output_directory : str, crop_box = fitz
 
         output_path = str(output_directory) + "\\" + input_file_path.split('\\')[-1]
         doc.save(output_path)
+
+    
     
         
 
@@ -88,9 +94,17 @@ def main():
 
     for filename in os.listdir(dir1):
         file_path = os.path.join(dir1, filename)
-        pdf_cropping_top(file_path, output_dir)
 
-        quantityFile += 1
+        try:
+            pdf_cropping_top(file_path, output_dir)
+
+        except FileDataError:
+            pass
+
+
+        else:
+
+            quantityFile += 1
 
     
     dir2 = Path("pdf_input_qr_bottom")
@@ -99,9 +113,16 @@ def main():
 
     for filename in os.listdir(dir2):
         file_path = os.path.join(dir2, filename)
-        pdf_cropping_bottom(file_path, output_dir)
 
-        quantityFile += 1
+        try:
+            pdf_cropping_bottom(file_path, output_dir)
+
+        except FileDataError:
+            pass
+
+        else:
+
+            quantityFile += 1
 
 
     
